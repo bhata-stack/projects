@@ -17,10 +17,10 @@
 			<section id="header" class="dark">
 				<header>
 					<h1>Financial Statement Scraper</h1>
-					<p>A webapp that takes the four letter </a></p>
+					<p>A webapp that takes the four letter company symbol and returns data on the company.</a></p>
 				</header>
 				<footer>
-					<a href="#first" class="button scrolly">Proceed to second phase</a>
+					<a href="#fourth" class="button scrolly">Try it out</a>
 				</footer>
 			</section>
 
@@ -36,17 +36,35 @@
 							<div class="row gtr-50">
 								<div class="col-6 col-12-mobile">
 									<input name="symbol" type="text" placeholder="Stock Symbol"/></div>
+								<!--
+								<div class="col-6 col-12-mobile" tabindex="-1">
+									<select name="datatype" id="datatype">
+										<option value="" disabled selected>Type of Data</option>
+										<option value="1">Financial Statement</option>
+										<option value="2">Balance Sheet</option>
+										<option value="3">Cash Flow Statement</option>
+									</select>
+								</div>-->
 								<div class="col-6 col-12-mobile" tabindex="-1">
 									<select name="statistic" id="statistic">
-										<option value="">Choose a statistic</option>
-										<option value="1">Option 1</option>
-										<option value="2">Option 2</option>
-										<option value="3">Option 3</option>
+										<option value="" disabled selected>Choose a statistic</option>
+										<option value="Total Revenue">Total Revenue</option>
+										<option value="Cost of Revenue">Cost of Revenue</option>
+										<option value="Gross Profit">Gross Profit</option>
+										<option value="Operating Expense">Operating Expense</option>
+										<option value="Operating Income">Operating Income</option>
+										<option value="Pretax Income">Pretax Income</option>
+										<option value="Total Operating Income as Reported">Total Operating Income as Reported</option>
+										<option value="Total Expenses">Total Expenses</option>
+										<option value="EBIT">EBIT</option>
+										<option value="EBITDA">EBITDA</option>
+										<option value="Reconciled Cost of Revenue">Reconciled Cost of Revenue</option>
+										<option value="Normalized EBITDA">Normalized EBITDA</option>
 									</select>
 								</div>
 								<div class="col-6 col-12-mobile" tabindex="-1">
 									<select name="format" id="format">
-										<option value="">Format</option>
+										<option value="" disabled selected>Format</option>
 										<option value="1">Raw Data</option>
 										<option value="2">Graph</option>
 									</select>
@@ -67,7 +85,7 @@
 			<section id="first" class="main">
 				<header>
 					<div class="container">
-						<h2>The data will go here</h2>
+						<canvas id="chart"></canvas>
 					</div>
 				</header>
 			</section>
@@ -240,7 +258,7 @@
 			<section id="footer">
 				<div class="copyright">
 					<ul class="menu">
-						<li>&copy;All rights reserved.</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+						<li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
 					</ul>
 				</div>
 			</section>
@@ -252,6 +270,21 @@
 			<script src="assets/js/breakpoints.min.js"></script>
 			<script src="assets/js/util.js"></script>
 			<script src="assets/js/main.js"></script>
-
+			<script>
+				if ("<%= scraped_data %>") {
+					const ctx = document.getElementById('chart').getContext('2d');
+					var chart = new Chart('ctx', {
+							type: 'horizontalBar',
+							data: {
+								labels: ['A', 'B', 'C'],
+								datasets: [
+								{
+									data: "<%= scraped_data %>"
+								}
+								]
+							}
+							})
+					}
+				</script>
 	</body>
 </html>

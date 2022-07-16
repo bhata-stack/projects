@@ -1,13 +1,19 @@
 // Load Node modules
 var express = require('express');
 var ejs = require('ejs');
-var bodyParser = require('body-parser');
+var fs = require('fs');
+var {PythonShell} = require('python-shell');
 
 
 
 // Initialise Express
 var app = express();
 
+// Parse URL-encoded bodies (as sent by HTML forms)
+app.use(express.urlencoded());
+
+// Parse JSON bodies (as sent by API clients)
+app.use(express.json());
 
 // Render static files
 app.use(express.static(__dirname + '/public'));
@@ -24,29 +30,50 @@ app.set('port', (process.env.PORT || 8080));
 // Root Route
 
 app.get('/', function (req, res) {
-    res.render('pages/index');
+    res.render('pages/index', {'scraped_data': null});
 });
 
 app.get('/index', function (req, res) {
-    res.render('pages/index');
+    res.render('pages/index', {'scraped_data': null});
 });
 
 app.get('/index.html', function (req, res) {
-    res.render('pages/index');
+    res.render('pages/index', {'scraped_data': null});
 });
 
-app.post('/get-data', function (req, res) {
-    var spawn = require('child_process').spawn;
-    var process = spawn('python', ['./python/scraper.py',
-    req.body.symbol,
-    req.body.statistic,
-    req.body.format
-    ]  
-    );
-    process.stdout.on('data', function (data) {
-        res.send(data.toString());
+const csvStringToArray = strData =>
+{
+    const objPattern = new RegExp(("(\\,|\\r?\\n|\\r|^)(?:\"([^\"]*(?:\"\"[^\"]*)*)\"|([^\\,\\r\\n]*))"),"gi");
+    let arrMatches = null, arrData = [[]];
+    while (arrMatches = objPattern.exec(strData)){
+        if (arrMatches[1].length && arrMatches[1] !== ",")arrData.push([]);
+        arrData[arrData.length - 1].push(arrMatches[2] ? 
+            arrMatches[2].replace(new RegExp( "\"\"", "g" ), "\"") :
+            arrMatches[3]);
+    }
+    return arrData;
+}
+
+function call_scraper(req, res) {
+    var options = {
+        args:
+        [
+            req.body.symbol,
+            req.body.statistic,
+            req.body.format
+        ]
+    }
+
+    PythonShell.run('./python/scraper.py', options, function (err, data) {
+        if (err) res.send(err);
+        data = data.toString();
+        data = csvStringToArray(data)
+        console.log(data)
+        res.render('pages/index', {'scraped_data': data});
     });
-});
+}
+
+app.post('/get-data', call_scraper);
 
 /*
 app.get('/imposter.pdf', function (req, res) {

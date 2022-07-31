@@ -13,21 +13,20 @@
 	</head>
 	<body class="is-preload">
 
-		<!-- Header -->
+		<!-- Header 
 			<section id="header" class="dark">
 				<header>
 					<h1>Financial Statement Scraper</h1>
 					<p>A webapp that takes the four letter company symbol and returns data on the company.</a></p>
 				</header>
-				<footer>
-					<a href="#fourth" class="button scrolly">Try it out</a>
-				</footer>
 			</section>
+		-->
 
 			<section id="fourth" class="main">
 				<header>
 					<div class="container">
-						<h2>Enter your search parameters</h2>
+						<h2>Financial Statement Scraper</h2>
+						<p>A webapp that takes an NYSE stock symbol and returns data on the company.</p>
 					</div>
 				</header>
 				<div class="content style4 featured">
@@ -47,21 +46,22 @@
 								</div>-->
 								<div class="col-6 col-12-mobile" tabindex="-1">
 									<select name="statistic" id="statistic">
-										<option value="" disabled selected>Choose a statistic</option>
-										<option value="Total Revenue">Total Revenue</option>
-										<option value="Cost of Revenue">Cost of Revenue</option>
-										<option value="Gross Profit">Gross Profit</option>
-										<option value="Operating Expense">Operating Expense</option>
-										<option value="Operating Income">Operating Income</option>
-										<option value="Pretax Income">Pretax Income</option>
-										<option value="Total Operating Income as Reported">Total Operating Income as Reported</option>
-										<option value="Total Expenses">Total Expenses</option>
+										<option value="" disabled selected>Statistic</option>
+										<option value="TotalRevenue">Total Revenue</option>
+										<option value="CostofRevenue">Cost of Revenue</option>
+										<option value="GrossProfit">Gross Profit</option>
+										<option value="OperatingExpense">Operating Expense</option>
+										<option value="OperatingIncome">Operating Income</option>
+										<option value="PretaxIncome">Pretax Income</option>
+										<option value="TotalOperatingIncomeasReported">Total Operating Income as Reported</option>
+										<option value="TotalExpenses">Total Expenses</option>
 										<option value="EBIT">EBIT</option>
 										<option value="EBITDA">EBITDA</option>
-										<option value="Reconciled Cost of Revenue">Reconciled Cost of Revenue</option>
-										<option value="Normalized EBITDA">Normalized EBITDA</option>
+										<option value="ReconciledCostofRevenue">Reconciled Cost of Revenue</option>
+										<option value="NormalizedEBITDA">Normalized EBITDA</option>
 									</select>
 								</div>
+								<!--
 								<div class="col-6 col-12-mobile" tabindex="-1">
 									<select name="format" id="format">
 										<option value="" disabled selected>Format</option>
@@ -69,7 +69,8 @@
 										<option value="2">Graph</option>
 									</select>
 								</div>
-								
+								-->
+
 								<div class="col-12">
 									<ul class="actions special">
 										<li><input type="submit" class="button" value="Submit" /></li>
@@ -78,16 +79,11 @@
 								</div>
 							</div>
 						</form>
+						<div class="container" style="padding-top: 4em;">
+							<canvas id="chart"></canvas>
+						</div>
 					</div>
 				</div>
-			</section>
-
-			<section id="first" class="main">
-				<header>
-					<div class="container">
-						<canvas id="chart"></canvas>
-					</div>
-				</header>
 			</section>
 
 		<!-- Basic Elements -->
@@ -270,21 +266,35 @@
 			<script src="assets/js/breakpoints.min.js"></script>
 			<script src="assets/js/util.js"></script>
 			<script src="assets/js/main.js"></script>
+			<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
 			<script>
-				if ("<%= scraped_data %>") {
-					const ctx = document.getElementById('chart').getContext('2d');
-					var chart = new Chart('ctx', {
-							type: 'horizontalBar',
-							data: {
-								labels: ['A', 'B', 'C'],
-								datasets: [
-								{
-									data: "<%= scraped_data %>"
-								}
-								]
+				var scraped_data = `<%= scraped_data %>`;
+				scraped_data = scraped_data.split(",")
+				scraped_data.reverse()
+				var title = `<%= title_data %>`;
+				var symbol = `<%= symbol %>`;
+				title = symbol + ": " + title;
+				if (typeof scraped_data == "object") {
+					new Chart(document.getElementById("chart"), {
+						type: 'line',
+						data: {
+							labels: [2018, 2019, 2020, 2021],
+							datasets: [{ 
+								data: scraped_data,
+								borderColor: "#3e95cd"
+							}]
+						},
+						options: {
+							title: {
+							display: true,
+							text: title
+							},
+							legend: {
+								display: false
 							}
-							})
-					}
+						}
+						});
+				}
 				</script>
 	</body>
 </html>

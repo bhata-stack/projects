@@ -3,6 +3,7 @@ var express = require('express');
 var ejs = require('ejs');
 var fs = require('fs');
 var {PythonShell} = require('python-shell');
+const { parse } = require('path');
 
 
 
@@ -41,19 +42,6 @@ app.get('/index.html', function (req, res) {
     res.render('pages/index', {'scraped_data': null});
 });
 
-const csvStringToArray = strData =>
-{
-    const objPattern = new RegExp(("(\\,|\\r?\\n|\\r|^)(?:\"([^\"]*(?:\"\"[^\"]*)*)\"|([^\\,\\r\\n]*))"),"gi");
-    let arrMatches = null, arrData = [[]];
-    while (arrMatches = objPattern.exec(strData)){
-        if (arrMatches[1].length && arrMatches[1] !== ",")arrData.push([]);
-        arrData[arrData.length - 1].push(arrMatches[2] ? 
-            arrMatches[2].replace(new RegExp( "\"\"", "g" ), "\"") :
-            arrMatches[3]);
-    }
-    return arrData;
-}
-
 function call_scraper(req, res) {
     var options = {
         args:
@@ -66,10 +54,16 @@ function call_scraper(req, res) {
 
     PythonShell.run('./python/scraper.py', options, function (err, data) {
         if (err) res.send(err);
-        data = data.toString();
-        data = csvStringToArray(data)
-        console.log(data)
-        res.render('pages/index', {'scraped_data': data});
+        for (var i = 0; i < data.length; i++) {
+            data[i] = data[i].replace("\r", "");
+        }
+        scraped_data = data.slice(1);
+        title_data = data[0];
+        scraped_data.forEach(function (point, index) {
+            scraped_data[index] = parseFloat(point);
+        })
+        console.log(scraped_data, title_data)
+        res.render('pages/index', {'symbol': req.body.symbol, 'title_data': title_data, 'scraped_data': scraped_data});
     });
 }
 
